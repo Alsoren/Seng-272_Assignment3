@@ -28,5 +28,6 @@ public class Scenario {
     @Override
     public String toString() {
         return name;
+        // JComboBox uses this method to display a readable scenario name.
     }
 }

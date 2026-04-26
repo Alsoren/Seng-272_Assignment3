@@ -22,7 +22,7 @@ public class CollectPanel extends WizardPanel {
         super(appState, scenarioRepository);
         this.scoreCalculator = new ScoreCalculator();
 
-        JLabel title = new JLabel("Step 4 - Collect Data (V1 preview)");
+        JLabel title = new JLabel("Step 4 - Collect Data");
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         add(title, BorderLayout.NORTH);
 

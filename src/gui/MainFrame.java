@@ -21,7 +21,7 @@ public class MainFrame extends JFrame {
     private int currentStep;
 
     public MainFrame() {
-        super("ISO 15939 Measurement Process Simulator - V1");
+        super("ISO 15939 Measurement Process Simulator - V2");
 
         AppState appState = new AppState();
         ScenarioRepository scenarioRepository = new ScenarioRepository();

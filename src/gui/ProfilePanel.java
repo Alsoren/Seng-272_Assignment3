@@ -49,6 +49,18 @@ public class ProfilePanel extends WizardPanel {
     }
 
     @Override
+    @Override
+    public void onEnterStep() {
+        // Restore previously entered profile data when the user navigates back to this step.
+        UserProfile profile = appState.getUserProfile();
+        if (profile == null) {
+            return;
+        }
+        usernameField.setText(profile.getUsername());
+        schoolField.setText(profile.getSchool());
+        sessionNameField.setText(profile.getSessionName());
+    }
+
     public boolean validateStep() {
         String username = usernameField.getText().trim();
         String school = schoolField.getText().trim();

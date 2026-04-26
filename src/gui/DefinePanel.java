@@ -16,16 +16,18 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DefinePanel extends WizardPanel {
     private final JRadioButton productQualityButton;
     private final JRadioButton processQualityButton;
-    private final JComboBox<String> modeComboBox;
+    private final ArrayList<JRadioButton> modeButtons;
     private final JComboBox<Scenario> scenarioComboBox;
 
     public DefinePanel(AppState appState, ScenarioRepository scenarioRepository) {
         super(appState, scenarioRepository);
+        modeButtons = new ArrayList<>();
 
         JLabel title = new JLabel("Step 2 - Define Quality Dimensions");
         title.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -43,27 +45,32 @@ public class DefinePanel extends WizardPanel {
         qualityTypeGroup.add(productQualityButton);
         qualityTypeGroup.add(processQualityButton);
 
-        modeComboBox = new JComboBox<>();
+        JPanel qualityPanel = new JPanel();
+        qualityPanel.add(productQualityButton);
+        qualityPanel.add(processQualityButton);
+
+        JPanel modePanel = new JPanel();
+        ButtonGroup modeGroup = new ButtonGroup();
         for (String mode : scenarioRepository.getModes()) {
-            modeComboBox.addItem(mode);
+            JRadioButton modeButton = new JRadioButton(mode);
+            modeButton.addActionListener(e -> refreshScenarios());
+            modeGroup.add(modeButton);
+            modePanel.add(modeButton);
+            modeButtons.add(modeButton);
         }
 
         scenarioComboBox = new JComboBox<>();
-        modeComboBox.addActionListener(e -> refreshScenarios());
         refreshScenarios();
 
         gbc.gridx = 0; gbc.gridy = 0;
         formPanel.add(new JLabel("Quality Type:"), gbc);
         gbc.gridx = 1;
-        JPanel radioPanel = new JPanel();
-        radioPanel.add(productQualityButton);
-        radioPanel.add(processQualityButton);
-        formPanel.add(radioPanel, gbc);
+        formPanel.add(qualityPanel, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
         formPanel.add(new JLabel("Mode:"), gbc);
         gbc.gridx = 1;
-        formPanel.add(modeComboBox, gbc);
+        formPanel.add(modePanel, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
         formPanel.add(new JLabel("Scenario:"), gbc);
@@ -74,8 +81,9 @@ public class DefinePanel extends WizardPanel {
     }
 
     private void refreshScenarios() {
+        // Scenario list depends on the selected measurement mode.
         scenarioComboBox.removeAllItems();
-        String selectedMode = (String) modeComboBox.getSelectedItem();
+        String selectedMode = getSelectedMode();
         if (selectedMode == null) {
             return;
         }
@@ -85,14 +93,56 @@ public class DefinePanel extends WizardPanel {
         }
     }
 
+    private String getSelectedMode() {
+        for (JRadioButton button : modeButtons) {
+            if (button.isSelected()) {
+                return button.getText();
+            }
+        }
+        return null;
+    }
+
     @Override
+    @Override
+    public void onEnterStep() {
+        // Restore quality type, mode, and scenario when the user returns with the Back button.
+        QualityType savedQualityType = appState.getQualityType();
+        if (savedQualityType == QualityType.PRODUCT_QUALITY) {
+            productQualityButton.setSelected(true);
+        } else if (savedQualityType == QualityType.PROCESS_QUALITY) {
+            processQualityButton.setSelected(true);
+        }
+
+        String savedMode = appState.getMode();
+        if (savedMode != null) {
+            for (JRadioButton button : modeButtons) {
+                if (button.getText().equals(savedMode)) {
+                    button.setSelected(true);
+                    break;
+                }
+            }
+            refreshScenarios();
+        }
+
+        Scenario savedScenario = appState.getSelectedScenario();
+        if (savedScenario != null) {
+            for (int i = 0; i < scenarioComboBox.getItemCount(); i++) {
+                Scenario candidate = scenarioComboBox.getItemAt(i);
+                if (candidate.getName().equals(savedScenario.getName())) {
+                    scenarioComboBox.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
     public boolean validateStep() {
         if (!productQualityButton.isSelected() && !processQualityButton.isSelected()) {
             JOptionPane.showMessageDialog(this, "Please select one quality type to continue.");
             return false;
         }
 
-        String selectedMode = (String) modeComboBox.getSelectedItem();
+        String selectedMode = getSelectedMode();
         Scenario selectedScenario = (Scenario) scenarioComboBox.getSelectedItem();
 
         if (selectedMode == null) {
