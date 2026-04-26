@@ -1,7 +1,7 @@
 ISO 15939 Measurement Process Simulator - Implementation V1
 
-Student Name: [Write your name here]
-Student ID: [Write your student ID here]
+Student Name: Ahmet Alp Keleş
+Student ID: 202328038
 Course: Software Project II
 Project Type: Individual Java Swing GUI Application
 
